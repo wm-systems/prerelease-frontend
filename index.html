@@ -1,20 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-  <link rel="icon" href="icons/icon-512.png" sizes="512x512">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#1a4d75"/>
+
+  <!-- PWA manifest & icons -->
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png"/>
+  <link rel="icon" href="icons/icon-512.png" sizes="512x512" type="image/png"/>
+
+  <link rel="stylesheet" href="styles.css"/>
   <title>Prerelease Services</title>
 </head>
 <body>
-  <div id="signinPage" class="hidden">…</div>
-  <div id="login" class="hidden">…</div>
-  <div id="appContainer" class="hidden">…</div>
+  <!-- 1) Sign-in prompt -->
+  <div id="signinPage" class="hidden">
+    <h2>Please sign in to Prerelease Services</h2>
+    <button id="signinButton" class="system">Sign in with Google</button>
+  </div>
 
+  <!-- 2) Not-authorized message -->
+  <div id="login" class="hidden">
+    <h2>Sorry, you’re not authorized to use this app.</h2>
+    <p>If you believe this is an error, contact your administrator.</p>
+  </div>
+
+  <!-- 3) Main App UI -->
+  <div class="page-container hidden" id="appContainer">
+    <header>
+      <img
+        src="https://docs.google.com/drawings/d/e/2PACX-1vROylVNWO-BaiJkrU6uTl0WjjDt8SyHuzLQfN4zzSBSPWs6FT9SQP0og70o40jQVrbQE-ebeQdvI2NQ/pub?w=1438&h=229"
+        alt="Lionsgate Logo">
+      <h1>Prerelease Services</h1>
+    </header>
+
+    <!-- This must exist for app.js to work -->
+    <div id="processingMessage" class="hidden"><i>Loading…</i></div>
+
+    <div class="tiles-container">
+      <div id="tiles" class="tiles"></div>
+    </div>
+  </div>
+
+  <!-- Your application logic -->
   <script src="app.js"></script>
+
+  <!-- Service Worker registration -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
