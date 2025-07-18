@@ -31,7 +31,15 @@ function hideAll() {
 
 function showSignIn() {
   hideAll();
-  document.getElementById('signinPage').classList.remove('hidden');
+  const signin = document.getElementById('signinPage');
+  signin.classList.remove('hidden');
+  document.getElementById('signinButton')
+    .addEventListener('click', () => {
+      // Kick off the OAuth flow on script.google.com, then bounce back here
+      const redirect = encodeURIComponent(window.location.href);
+      window.location.href =
+        `${GAS_BASE}?loginRedirect=${redirect}`;
+    });
 }
 
 function showLogin(msg) {
