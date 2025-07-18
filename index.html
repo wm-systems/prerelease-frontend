@@ -14,19 +14,19 @@
   <title>Prerelease Services</title>
 </head>
 <body>
-  <!-- 1) Sign-in prompt -->
+  <!-- 1) Ask them to sign in -->
   <div id="signinPage" class="hidden">
     <h2>Please sign in to Prerelease Services</h2>
     <button id="signinButton" class="system">Sign in with Google</button>
   </div>
 
-  <!-- 2) Not-authorized message -->
+  <!-- 2) Signed in but not in Users sheet -->
   <div id="login" class="hidden">
     <h2>Sorry, you’re not authorized to use this app.</h2>
     <p>If you believe this is an error, contact your administrator.</p>
   </div>
 
-  <!-- 3) Main App UI -->
+  <!-- 3) The main app UI -->
   <div class="page-container hidden" id="appContainer">
     <header>
       <img
@@ -35,7 +35,7 @@
       <h1>Prerelease Services</h1>
     </header>
 
-    <!-- This must exist for app.js to work -->
+    <!-- show/hide this -->
     <div id="processingMessage" class="hidden"><i>Loading…</i></div>
 
     <div class="tiles-container">
@@ -43,13 +43,14 @@
     </div>
   </div>
 
-  <!-- Your application logic -->
+  <!-- App logic -->
   <script src="app.js"></script>
 
-  <!-- Service Worker registration -->
+  <!-- SW registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
+      navigator.serviceWorker
+        .register('service-worker.js')
         .then(r => console.log('SW registered:', r.scope))
         .catch(e => console.error('SW failed:', e));
     }
