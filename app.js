@@ -1,6 +1,27 @@
-// Replace with your actual Apps Script exec URL:
+// Your GAS exec URL
 const GAS_BASE =
   'https://script.google.com/macros/s/AKfycbwDfGg8zWKZMo_M-WqPxrgT3OWPGwpv0VSDYbsOC3uk7pbWWhTzC0vipfaJBvjRVv8_sQ/exec';
+
+// Helper to load a JSONP endpoint
+function loadJSONP(url) {
+  return new Promise((resolve, reject) => {
+    const fnName = 'jsonp_' + Date.now();
+    // Create global callback
+    window[fnName] = data => {
+      delete window[fnName];
+      script.remove();
+      resolve(data);
+    };
+    const script = document.createElement('script');
+    script.src = url + '&callback=' + fnName;
+    script.onerror = e => {
+      delete window[fnName];
+      script.remove();
+      reject(new Error('JSONP load error: ' + url));
+    };
+    document.body.appendChild(script);
+  });
+}
 
 function hideAll() {
   ['signinPage', 'login', 'appContainer'].forEach(id =>
@@ -10,40 +31,28 @@ function hideAll() {
 
 function showSignIn() {
   hideAll();
-  const signin = document.getElementById('signinPage');
-  signin.classList.remove('hidden');
-  document.getElementById('signinButton')
-    .addEventListener('click', () => location.reload());
+  document.getElementById('signinPage').classList.remove('hidden');
 }
 
-function showLogin(message) {
+function showLogin(msg) {
   hideAll();
   const login = document.getElementById('login');
-  if (message) login.querySelector('h2').textContent = message;
+  if (msg) login.querySelector('h2').textContent = msg;
   login.classList.remove('hidden');
 }
 
 function renderApp(tiles, systems) {
   hideAll();
   document.getElementById('appContainer').classList.remove('hidden');
-
-  const processingEl = document.getElementById('processingMessage');
-  processingEl.classList.add('hidden');
+  document.getElementById('processingMessage').classList.add('hidden');
 
   const container = document.getElementById('tiles');
   container.innerHTML = '';
-
   tiles.forEach(tile => {
-    const tileEl = document.createElement('div');
-    tileEl.className = 'tile';
-
-    const h2 = document.createElement('h2');
-    h2.textContent = tile.Name;
-    tileEl.appendChild(h2);
-
-    const systemsDiv = document.createElement('div');
-    systemsDiv.className = 'systems';
-
+    const box = document.createElement('div');
+    box.className = 'tile';
+    box.innerHTML = `<h2>${tile.Name}</h2><div class="systems"></div>`;
+    const sysDiv = box.querySelector('.systems');
     systems
       .filter(s => s.Tile === tile.Name)
       .forEach(s => {
@@ -51,11 +60,9 @@ function renderApp(tiles, systems) {
         btn.className = 'system';
         btn.textContent = s.System;
         btn.onclick = () => goToSystem(s.Link, btn);
-        systemsDiv.appendChild(btn);
+        sysDiv.appendChild(btn);
       });
-
-    tileEl.appendChild(systemsDiv);
-    container.appendChild(tileEl);
+    container.appendChild(box);
   });
 }
 
@@ -68,38 +75,29 @@ function goToSystem(url, btn) {
 }
 
 async function init() {
-  // 1) Register the SW
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .register('service-worker.js')
-      .then(reg => console.log('✅ SW registered; scope=', reg.scope))
-      .catch(err => console.error('❌ SW failed:', err));
-  }
-
-  // 2) Show processing message
+  // Show loading
   const proc = document.getElementById('processingMessage');
   proc.textContent = 'Loading…';
   proc.classList.remove('hidden');
 
   try {
-    // 3) Fetch signed-in email
-    const email = await fetch(`${GAS_BASE}?rpc=getUserEmail`).then(r => r.text());
+    // 1) Get user email
+    const email = await loadJSONP(`${GAS_BASE}?rpc=getUserEmail`);
     if (!email) {
       showSignIn();
       return;
     }
 
-    // 4) Fetch settings
-    const settings = await fetch(
+    // 2) Get settings
+    const settings = await loadJSONP(
       `${GAS_BASE}?rpc=getSettings&email=${encodeURIComponent(email)}`
-    ).then(r => r.json());
-
+    );
     if (settings.error) {
       showLogin(settings.error);
       return;
     }
 
-    // 5) Render tiles
+    // 3) Render
     const [tiles, systems] = settings;
     renderApp(tiles, systems);
 
