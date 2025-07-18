@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="icon" href="icons/icon-512.png" sizes="512x512">
+  <link rel="stylesheet" href="styles.css">
+  <title>Prerelease Services</title>
+</head>
+<body>
+  <div id="signinPage" class="hidden">…</div>
+  <div id="login" class="hidden">…</div>
+  <div id="appContainer" class="hidden">…</div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(r => console.log('SW registered:', r.scope))
+        .catch(e => console.error('SW failed:', e));
+    }
+  </script>
+</body>
+</html>
